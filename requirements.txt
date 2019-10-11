@@ -1,6 +1,9 @@
-PyQt5<5.12
+PyQt5
+PyQt5-sip
+PyQtWebEngine
 psutil
 bitmath
 beautifulsoup4
 bleach
 click
+git+https://github.com/sirrandoo/qtutilities@master#egg=qtutilities
