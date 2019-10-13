@@ -22,7 +22,6 @@
 # the GNU General Public License along
 # with ShovelBot.
 # If not, see <http://www.gnu.org/licenses/>.
-import functools
 import json
 import logging
 import pathlib
@@ -113,10 +112,6 @@ def entry_update(settings_file: pathlib.Path, extensions: pathlib.Path = None):
     
     # Declarations
     app_requirements = pathlib.Path('requirements.txt')
-    boiler = functools.partial(subprocess.call,
-                               executable=sys.executable,
-                               stdout=subprocess.DEVNULL,
-                               stderr=subprocess.DEVNULL)
     
     # Validate the application's requirements.txt file
     if not app_requirements.exists():
@@ -145,7 +140,9 @@ def entry_update(settings_file: pathlib.Path, extensions: pathlib.Path = None):
                     progress.label = f'Updating {dep}...'
                 
                 # Run pip
-                boiler(args=['-m', 'pip', 'install', '-U', dep])
+                subprocess.run([sys.executable, '-m', 'pip', 'install', '-U', dep],
+                               stdout=subprocess.DEVNULL,
+                               stderr=subprocess.DEVNULL)
     
     # Validate the extensions argument
     if extensions is None:
@@ -217,7 +214,8 @@ def entry_update(settings_file: pathlib.Path, extensions: pathlib.Path = None):
         
         if not ext_requirements.exists():
             continue
-        
+
+        click.echo(f'Updating dependencies for extension "{ext!s}"')
         with ext_requirements.open() as INFILE:
             with click.progressbar(
                     iterable=INFILE.readlines(),
@@ -240,7 +238,9 @@ def entry_update(settings_file: pathlib.Path, extensions: pathlib.Path = None):
                         progress.label = f'Updating {dep}...'
                     
                     # Run pip
-                    boiler(args=['-m', 'pip', 'install', '-U', dep])
+                    subprocess.run([sys.executable, '-m', 'pip', 'install', '-U', dep],
+                                   stdout=subprocess.DEVNULL,
+                                   stderr=subprocess.DEVNULL)
 
 
 # noinspection PyUnusedLocal
