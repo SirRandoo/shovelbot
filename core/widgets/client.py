@@ -832,7 +832,7 @@ class ShovelBot(QtWidgets.QMainWindow):
                                             headers={'Accept': 'application/vnd.github.v3+json'})
         
         # More validation
-        if not response.is_ok():
+        if not response.is_okay():
             self.LOGGER.warning(f"Couldn't check for updates!  Reason: {response.error_string()}")
             
             if response.code() == QtNetwork.QNetworkReply.ContentAccessDenied:
