@@ -276,8 +276,9 @@ class Twitch(core_dataclasses.Platform, core_dataclasses.Modifier, client.Client
         elif token == '':
             login = 'justinfan3892'
             token = 'foobar'
-        
-        self.irc.set_credentials(login, token)
+
+        if self.irc.nick.lower() != login.lower() or self.irc.token != token.lower():
+            self.irc.set_credentials(login, token)
         
         if self.irc.is_connected() and channel.lower() not in self.irc.channels:
             # Leave every channel the client is currently in
