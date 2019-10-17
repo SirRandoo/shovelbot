@@ -61,7 +61,7 @@ class QApplication(QtWidgets.QApplication):
         # Metadata assignment
         self.setApplicationName('shovelbot')
         self.setApplicationDisplayName('ShovelBot: Portable')
-        self.setApplicationVersion('0.1.0')
+        self.setApplicationVersion('0.2.0')
         self.setWindowIcon(QtGui.QIcon(self.client.ASSETS.filePath('icon.png')))
         self.setOrganizationName('SirRandoo')
         self.setOrganizationDomain(self.client.REPOSITORY.toDisplayString())
