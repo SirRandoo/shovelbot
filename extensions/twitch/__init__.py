@@ -26,9 +26,9 @@ import inspect
 import typing
 from typing import Dict, List, Tuple
 
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets
 
-from QtTwitch import client, gateway, http
+from QtTwitch import client, gateway, http, parser
 from QtUtilities import settings as qsettings
 from core.utils import dataclasses as core_dataclasses, enums as core_enums
 from . import dataclasses as twitch_dataclasses, enums as twitch_enums
@@ -70,7 +70,8 @@ class Twitch(core_dataclasses.Platform, core_dataclasses.Modifier, client.Client
         # Stitching
         self.bot.aboutToStart.connect(self.prepare_connection)
         self.bot.aboutToStop.connect(self.destroy_connection)
-        self.irc.on_message.connect(self.onMessage.emit)
+        self.irc.on_message.connect(self.transform_message)
+        # self.irc.on_message.connect(functools.partial(print, 'IRC DEBUG >'))
     
     # Token methods
     def process_token(self):
@@ -257,8 +258,8 @@ class Twitch(core_dataclasses.Platform, core_dataclasses.Modifier, client.Client
         
         finally:
             self.process_token()
-    
-    # Signals
+
+    # Slots
     def sync_settings(self):
         """Syncs setting changes with objects the Twitch extension uses."""
         channel = self.bot.settings['extensions']['twitch']['channel'].value
@@ -287,6 +288,41 @@ class Twitch(core_dataclasses.Platform, core_dataclasses.Modifier, client.Client
             # Join the new channel
             if channel:
                 self.irc.join(channel)
+
+    def transform_message(self, message: str):
+        """Transform a QtTwitch message string into a Message dataclass."""
+        m = parser.Parser.PATTERN.match(message)
+    
+        if not m:
+            return self.LOGGER.warning(f'Could not parse message "{message}"')
+    
+        components = m.groupdict()
+    
+        if components['command'] == 'PRIVMSG':
+            tags = {}
+        
+            if 'tags' in components:
+                for segment in components['tags'].split(';'):
+                    parts = segment.split('=')
+                
+                    try:
+                        tags[parts[0]] = parts[1]
+                
+                    except IndexError:
+                        tags[parts[0]] = ""
+        
+            username = components['prefix'].split('!')[0]
+            display_name = tags.get('display-name', username.title())
+            color = QtGui.QColor(tags.get('color', '#262626'))
+            badge_str = tags.get('badges', '')
+        
+            mod = 'moderator' in badge_str or 'global_mod' in badge_str or 'staff' in badge_str \
+                  or 'broadcaster' in badge_str or 'admin' in badge_str
+        
+            user = core_dataclasses.User(username, display_name, color, mod)
+            message = core_dataclasses.Message(components['params'].split(' ')[-1], user)
+        
+            self.onMessage.emit(message)
     
     # Extension overrides
     def setup(self):
