@@ -612,7 +612,7 @@ class ShovelBot(QtWidgets.QMainWindow):
     # Chat methods
     def process_chat_message(self, platform: dataclasses.Platform, message: dataclasses.Message):
         """Processes a raw chat message into a command."""
-        if not message.content.startswith(self.settings['extensions']['platforms']['command_prefix'].value):
+        if not message.content.startswith(self.settings['system']['prefix'].value):
             if self.command_manager.PARSER_DEBUG:
                 self.LOGGER.debug(f'Message "{message}" '
                                   f'does not start with the user\'s '
