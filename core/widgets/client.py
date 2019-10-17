@@ -134,7 +134,7 @@ class ShovelBot(QtWidgets.QMainWindow):
             p.task('Stitching ui signals...', self.ui.stitch)
             p.task('Stitching settings to slots...', self.stitch_settings)
             p.task('Applying settings...', self.apply_settings)
-            p.threaded_task('Loading extensions...', self.load_extensions)
+            p.task('Loading extensions...', self.load_extensions)
             p.task('Setting up extensions...', self.setup_extensions)
             p.wait_for_task('Preparing help files...', self.help_engine.setupFinished,
                             before=self.help_engine.setupData)
