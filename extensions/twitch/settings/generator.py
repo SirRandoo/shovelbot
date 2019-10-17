@@ -267,80 +267,82 @@ class Generator(QtWidgets.QDialog):
     
     def url_watcher(self, url: QtCore.QUrl):
         """Watches the QWebEngineView for url changes."""
-        if url.host() not in ['twitch.tv', 'localhost', self.ENDPOINT.host()] and url.host() != '':
+        if url.host() not in ['twitch.tv', 'localhost', self.ENDPOINT.host(),
+                              'passport.twitch.tv'] and url.host() != '':
+        
             self.LOGGER.warning(f'Redirected to an unsupported host!  ({url.host()})')
-            
+
             self.LOGGER.debug('Creating informative dialog...')
             _m = QtWidgets.QMessageBox(
                 QtWidgets.QMessageBox.Critical, 'Token Generator',
                 f'You were redirected to an unsupported host.  ({url.host()})',
                 QtWidgets.QMessageBox.Ok, self
             )
-            
+
             self.LOGGER.debug('Displaying dialog...')
             self.hide()
             _m.exec()
-            
+
             self.LOGGER.debug('Ensuring dialog is deleted properly...')
             if not sip.isdeleted(_m):
                 _m.deleteLater()
-            
+
             self.browser.setUrl(QtCore.QUrl('about:blank'))
             return self.reject()
-        
+
         if url.hasFragment():
             query = QtCore.QUrlQuery(url.fragment())
-        
+
         else:
             query = QtCore.QUrlQuery(url.query())
-        
-        if not query.hasQueryItem('state'):
+
+        if not query.hasQueryItem('state') and url.path() != '/two_factor/new':
             self.LOGGER.warning('No state sent!')
-            
+
             self.LOGGER.debug('Creating informative dialog...')
             _m = QtWidgets.QMessageBox(
                 QtWidgets.QMessageBox.Critical, 'Token Generator',
                 "The state parameter wasn't passed.",
                 QtWidgets.QMessageBox.Ok, self
             )
-            
+
             self.LOGGER.debug('Displaying dialog...')
             self.hide()
             _m.exec()
-            
+
             self.LOGGER.debug('Ensuring dialog is deleted properly...')
             if not sip.isdeleted(_m):
                 _m.deleteLater()
-            
+
             self.browser.setUrl(QtCore.QUrl('about:blank'))
             return self.reject()
-        
-        if self._state != query.queryItemValue('state'):
+
+        if query.hasQueryItem('state') and self._state != query.queryItemValue('state'):
             self.LOGGER.warning('Sent state is not our state!')
-            
+
             self.LOGGER.debug('Creating informative dialog...')
             _m = QtWidgets.QMessageBox(
                 QtWidgets.QMessageBox.Critical, 'Token Generator',
                 'Sent state is not our state.',
                 QtWidgets.QMessageBox.Ok, self
             )
-            
+
             self.LOGGER.debug('Displaying dialog...')
             _m.exec()
             self.hide()
-            
+
             self.LOGGER.debug('Ensuring dialog is deleted properly...')
             if not sip.isdeleted(_m):
                 _m.deleteLater()
-            
+
             self.browser.setUrl(QtCore.QUrl('about:blank'))
             return self.reject()
-        
+
         if query.hasQueryItem('access_token'):
             # Declarations
             app: QtWidgets.QApplication = QtWidgets.QApplication.instance()
             client_id = app.client.settings['extensions']['twitch']['client_id'].value
             scopes: typing.List[Scopes] = [Scopes(s) for s in parse.unquote(query.queryItemValue('scope')).split('+')]
-            
+
             self.GENERATED.emit(token.Token(client_id, query.queryItemValue('access_token'), scopes))
             self.accept()
