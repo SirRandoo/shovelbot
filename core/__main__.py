@@ -168,27 +168,33 @@ def entry_update(settings_file: pathlib.Path, extensions: pathlib.Path = None):
                 
                 else:
                     click.echo("Translating settings file...")
-                    s = settings.Setting.from_data(settings_raw)
-                    
+                    t = []
+
+                    for segment in settings_raw:
+                        t.append(settings.Setting.from_data(segment))
+    
                     # Attempt to locate the extensions directory
-                    try:
-                        d = pathlib.Path(s['extensions']['directory'].value)
-                    
-                    except KeyError:
-                        click.echo("Your settings file is missing a couple of settings!")
-                        click.echo("If you've freshly generate it, you should report a bug @ "
-                                   f"{application.client.REPOSITORY.toDisplayString()}/issues/new")
-                        click.echo(f"If your settings file is from a prior version of "
-                                   f"{application.applicationDisplayName()}, you should check to see if older settings "
-                                   f"files will need to be discarded/imported at "
-                                   f"{application.client.REPOSITORY.toDisplayString()}/releases/"
-                                   f"v{application.applicationVersion()}")
-                        
-                        if click.confirm("Do you want to manually input your extensions directory?", abort=True):
-                            extensions = click.prompt("Extension directory", type=pathlib.Path)
-                    
-                    else:
-                        extensions = d
+                    for s in t:
+                        if s.key == 'extensions':
+                            try:
+                                d = pathlib.Path(s['directory'].value)
+        
+                            except KeyError:
+                                click.echo("Your settings file is missing a couple of settings!")
+                                click.echo("If you've freshly generate it, you should report a bug @ "
+                                           f"{application.client.REPOSITORY.toDisplayString()}/issues/new")
+                                click.echo(f"If your settings file is from a prior version of "
+                                           f"{application.applicationDisplayName()}, you should check to see if older settings "
+                                           f"files will need to be discarded/imported at "
+                                           f"{application.client.REPOSITORY.toDisplayString()}/releases/"
+                                           f"v{application.applicationVersion()}")
+            
+                                if click.confirm("Do you want to manually input your extensions directory?",
+                                                 abort=True):
+                                    extensions = click.prompt("Extension directory", type=pathlib.Path)
+        
+                            else:
+                                extensions = d
         
         else:
             click.echo("Your settings file doesn't exist!")
