@@ -141,6 +141,9 @@ class ShovelBot(QtWidgets.QMainWindow):
             
             p.finished.connect(self.show)
             p.finished.connect(self.dump)
+
+        app = QtWidgets.QApplication.instance()
+        self.request_factory = requests.Factory(manager=app.network_access_manager)
     
     def setup_help_ui(self):
         """Prepares the help UI for display."""
