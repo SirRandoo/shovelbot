@@ -56,7 +56,7 @@ def token(obj: settings.Setting):
         display.setText(str(obj.value))
     
     # Forcibly reassign the converter
-    obj.converter = 'twitch_token'
+    obj.converter = 'twitch.token'
     
     # Signals
     def on_generate(t: Token):
