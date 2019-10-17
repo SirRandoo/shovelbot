@@ -33,7 +33,7 @@ import textwrap
 import typing
 from typing import Dict, List, Union
 
-from PyQt5 import QtCore, QtGui, QtHelp, QtNetwork, QtSql, QtWidgets
+from PyQt5 import QtCore, QtGui, QtHelp, QtNetwork, QtSql, QtWidgets, sip
 
 from QtUtilities import requests, settings, signals, themes
 from QtUtilities.utils import should_create_widget
@@ -1015,24 +1015,33 @@ class ShovelBot(QtWidgets.QMainWindow):
         
         This override is responsible for processing closing operations,
         like saving user settings."""
+        self.LOGGER.info('Performing closing operations...')
+
+        self.LOGGER.info('Serializing settings...')
         try:
             d = json.dumps(self.settings.to_data())
-        
+
         except ValueError as e:
             self.LOGGER.warning('Settings could not be serialized!')
             self.LOGGER.warning(f'Reason: {e.__cause__}')
-        
+
         else:
             if not self._settings_file.isOpen():
                 self._settings_file.open(QtCore.QFile.WriteOnly | QtCore.QFile.Text | QtCore.QFile.Truncate)
-            
+
             if self._settings_file.isWritable():
+                self.LOGGER.info('Saving settings...')
                 self._settings_file.write(d.encode(encoding='UTF-8'))
-            
+
             else:
                 self.LOGGER.warning('Settings could not be saved!')
                 self.LOGGER.warning(f'Reason: #{self._settings_file.error()} - {self._settings_file.errorString()}')
-        
+
         finally:
             if self._settings_file.isOpen():
                 self._settings_file.close()
+
+        if not sip.isdeleted(self.settings):
+            self.settings.close()
+
+        self.LOGGER.info('Done!')
