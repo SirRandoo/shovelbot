@@ -292,37 +292,37 @@ class Twitch(core_dataclasses.Platform, core_dataclasses.Modifier, client.Client
 
     def transform_message(self, message: str):
         """Transform a QtTwitch message string into a Message dataclass."""
-        m = parser.Parser.PATTERN.match(message)
-    
+        m = parser.Parser.PATTERN.match(message.strip())
+        
         if not m:
             return self.LOGGER.warning(f'Could not parse message "{message}"')
-    
+
         components = m.groupdict()
-    
+
         if components['command'] == 'PRIVMSG':
             tags = {}
-        
+
             if 'tags' in components:
                 for segment in components['tags'].split(';'):
                     parts = segment.split('=')
-                
+
                     try:
                         tags[parts[0]] = parts[1]
-                
+
                     except IndexError:
                         tags[parts[0]] = ""
-        
+
             username = components['prefix'].split('!')[0]
             display_name = tags.get('display-name', username.title())
             color = QtGui.QColor(tags.get('color', '#262626'))
             badge_str = tags.get('badges', '')
-        
+
             mod = 'moderator' in badge_str or 'global_mod' in badge_str or 'staff' in badge_str \
                   or 'broadcaster' in badge_str or 'admin' in badge_str
-        
+
             user = core_dataclasses.User(username, display_name, color, mod)
-            message = core_dataclasses.Message(components['params'].split(' ')[-1], user)
-        
+            message = core_dataclasses.Message(components['params'].split(' ')[-1].lstrip(':'), user)
+            
             self.onMessage.emit(message)
     
     # Extension overrides
