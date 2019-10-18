@@ -112,6 +112,10 @@ class Twitch(core_dataclasses.Platform, core_dataclasses.Modifier):
             
             self.irc.disconnect()
             self.irc.channels.clear()
+
+    def send_message(self, message: str):
+        """Sends a message to Twitch's IR servers."""
+        self.irc.send_priv_message(self.bot.settings['extensions']['twitch']['channel'].value, message)
     
     # Generator methods
     def register_scope(self, extension_name: str, scope: str, reason: str = None):
@@ -272,6 +276,29 @@ class Twitch(core_dataclasses.Platform, core_dataclasses.Modifier):
         if token is not None and token != '':
             response = self.http.validate_token(token)
             login = response['login']
+            self.bot.settings['extensions']['twitch']['token'].data['scopes'] = response.get('scopes', [])
+
+            # Set the QLineEdit's text to the token
+            # TODO: This could potentially cause issues with process_token
+            try:
+                view = self.bot.settings.view['extensions/twitch/token']
+
+            except KeyError:
+                self.LOGGER.warning("The settings dialog hasn't been set up yet!")
+                raise LookupError("The settings dialog hasn't been set up yet!")
+
+            else:
+                if view.display is None or view.display.layout() is None:
+                    self.LOGGER.warning("The token setting's display hasn't been set up yet!")
+                    raise LookupError(f"The token setting's display hasn't been set up yet!")
+    
+                for child in view.display.layout().children():
+                    if isinstance(child, QtWidgets.QLineEdit):
+                        child.setToolTip('Current scopes: {}'.format(', '.join(response.get('scopes', []))))
+                        break
+
+            finally:
+                self.process_token()
         
         elif token == '':
             login = 'justinfan3892'
