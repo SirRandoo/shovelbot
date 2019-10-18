@@ -321,8 +321,8 @@ class Twitch(core_dataclasses.Platform, core_dataclasses.Modifier, client.Client
                   or 'broadcaster' in badge_str or 'admin' in badge_str
         
             user = core_dataclasses.User(username, display_name, color, mod)
-            message = core_dataclasses.Message(components['params'].split(' ')[-1], user)
-        
+            message = core_dataclasses.Message(components['params'].split(' ')[-1].lstrip(':'), user)
+            
             self.onMessage.emit(message)
     
     # Extension overrides
