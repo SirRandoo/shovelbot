@@ -40,7 +40,7 @@ if typing.TYPE_CHECKING:
 __all__ = ['Twitch']
 
 
-class Twitch(core_dataclasses.Platform, core_dataclasses.Modifier, client.Client):
+class Twitch(core_dataclasses.Platform, core_dataclasses.Modifier):
     """The core of the Twitch extension."""
     # Signals
     TOKEN_CHANGED = QtCore.pyqtSignal(object)  # Token instance
