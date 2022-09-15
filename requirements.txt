@@ -1,0 +1,6 @@
+PySide6
+bitmath
+beautifulsoup4
+bleach
+click
+git+https://github.com/sirrandoo/qtutilities@master#egg=qtutilities
