@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<QtHelpProject version="1.0">
+    <namespace>sirrandoo.io.shovelbot</namespace>
+    <virtualFolder>docs</virtualFolder>
+    
+    <customFilter name="ShovelBot">
+        <filterAttribute>shovelbot</filterAttribute>
+    </customFilter>
+    
+    <filterSection>
+        <filterAttribute>shovelbot</filterAttribute>
+        
+        <toc>
+            <section title="ShovelBot Manual" ref="install/index.html">
+                <section title="Installation" ref="install/index.html"/>
+            </section>
+        </toc>
+        
+        <files>
+            <file>index.html</file>
+        </files>
+    </filterSection>
+</QtHelpProject>
